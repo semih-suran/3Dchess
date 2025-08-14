@@ -1,10 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Chess } from 'chess.js';
-import type { GameState, ChessMove, UseChessGameResult, Player, TimeControl, Square } from '@/types';
+import type {
+  GameState,
+  ChessMove,
+  UseChessGameResult,
+  Player,
+  TimeControl,
+  Square,
+} from '@/types';
 
 const INITIAL_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-export const useChessGame = (initialTimeControl: TimeControl = { minutes: 5, increment: 3 }): UseChessGameResult => {
+export const useChessGame = (
+  initialTimeControl: TimeControl = { minutes: 5, increment: 3 },
+): UseChessGameResult => {
   const [game, setGame] = useState(new Chess());
   const [gameState, setGameState] = useState<GameState>({
     fen: game.fen(),
@@ -25,14 +34,16 @@ export const useChessGame = (initialTimeControl: TimeControl = { minutes: 5, inc
     const isGameOver = currentGame.isGameOver();
     let gameStatus = status || '';
     if (isGameOver) {
-      if (currentGame.isCheckmate()) gameStatus = `Checkmate! ${currentGame.turn() === 'w' ? 'Black' : 'White'} wins.`;
+      if (currentGame.isCheckmate())
+        gameStatus = `Checkmate! ${currentGame.turn() === 'w' ? 'Black' : 'White'} wins.`;
       else if (currentGame.isDraw()) gameStatus = 'Draw!';
       else if (currentGame.isStalemate()) gameStatus = 'Stalemate!';
-      else if (currentGame.isThreefoldRepetition()) gameStatus = 'Draw by threefold repetition!';
+      else if (currentGame.isThreefoldRepetition())
+        gameStatus = 'Draw by threefold repetition!';
     } else if (currentGame.isCheck()) {
       gameStatus = 'Check!';
     }
-    
+
     setGameState({
       fen: currentGame.fen(),
       history: currentGame.history({ verbose: true }),
@@ -50,7 +61,7 @@ export const useChessGame = (initialTimeControl: TimeControl = { minutes: 5, inc
     if (gameState.isGameOver) return;
 
     const timer = setInterval(() => {
-      setPlayers(prev => {
+      setPlayers((prev) => {
         const newTime = Math.max(0, prev[activePlayer].timeLeft - 1);
         if (newTime === 0) {
           const newGame = new Chess();
@@ -68,54 +79,88 @@ export const useChessGame = (initialTimeControl: TimeControl = { minutes: 5, inc
     return () => clearInterval(timer);
   }, [activePlayer, gameState.isGameOver, game, updateGameState]);
 
-
-  const selectSquare = useCallback((square: Square | null) => {
-    if (gameState.isGameOver) return;
-    if (square === null) {
-      setGameState(prev => ({ ...prev, selectedSquare: null, legalMoves: [] }));
-      return;
-    }
-
-    const piece = game.get(square);
-    if (!piece || piece.color !== game.turn()) {
-      if (gameState.selectedSquare && gameState.legalMoves.some(m => m.to === square)) {
-        makeMove(gameState.selectedSquare, square);
-      } else {
-        setGameState(prev => ({ ...prev, selectedSquare: null, legalMoves: [] }));
-      }
-      return;
-    }
-    
-    const moves = game.moves({ square, verbose: true });
-    setGameState(prev => ({ ...prev, selectedSquare: square, legalMoves: moves }));
-  }, [game, gameState.isGameOver, gameState.selectedSquare, gameState.legalMoves]);
-
-  const makeMove = useCallback((from: string, to: string, promotion: string = 'q') => {
-    if (gameState.isGameOver) return false;
-    
-    // Create a new game instance from the PGN to preserve history
-    const newGame = new Chess();
-    newGame.loadPgn(game.pgn());
-    
-    try {
-      const moveResult = newGame.move({ from, to, promotion });
-      
-      if (moveResult) {
-        setGame(newGame);
-        updateGameState(newGame);
-        setPlayers(prev => ({
+  const selectSquare = useCallback(
+    (square: Square | null) => {
+      if (gameState.isGameOver) return;
+      if (square === null) {
+        setGameState((prev) => ({
           ...prev,
-          [activePlayer]: { timeLeft: prev[activePlayer].timeLeft + initialTimeControl.increment },
+          selectedSquare: null,
+          legalMoves: [],
         }));
-        return true;
+        return;
       }
-    } catch (e) {
-      console.error("Invalid move:", e);
-      selectSquare(null);
+
+      const piece = game.get(square);
+      if (!piece || piece.color !== game.turn()) {
+        if (
+          gameState.selectedSquare &&
+          gameState.legalMoves.some((m) => m.to === square)
+        ) {
+          makeMove(gameState.selectedSquare, square);
+        } else {
+          setGameState((prev) => ({
+            ...prev,
+            selectedSquare: null,
+            legalMoves: [],
+          }));
+        }
+        return;
+      }
+
+      const moves = game.moves({ square, verbose: true });
+      setGameState((prev) => ({
+        ...prev,
+        selectedSquare: square,
+        legalMoves: moves,
+      }));
+    },
+    [
+      game,
+      gameState.isGameOver,
+      gameState.selectedSquare,
+      gameState.legalMoves,
+    ],
+  );
+
+  const makeMove = useCallback(
+    (from: string, to: string, promotion: string = 'q') => {
+      if (gameState.isGameOver) return false;
+
+      // Create a new game instance from the PGN to preserve history
+      const newGame = new Chess();
+      newGame.loadPgn(game.pgn());
+
+      try {
+        const moveResult = newGame.move({ from, to, promotion });
+
+        if (moveResult) {
+          setGame(newGame);
+          updateGameState(newGame);
+          setPlayers((prev) => ({
+            ...prev,
+            [activePlayer]: {
+              timeLeft:
+                prev[activePlayer].timeLeft + initialTimeControl.increment,
+            },
+          }));
+          return true;
+        }
+      } catch (e) {
+        console.error('Invalid move:', e);
+        selectSquare(null);
+        return false;
+      }
       return false;
-    }
-    return false;
-  }, [game, gameState.isGameOver, updateGameState, activePlayer, initialTimeControl.increment]);
+    },
+    [
+      game,
+      gameState.isGameOver,
+      updateGameState,
+      activePlayer,
+      initialTimeControl.increment,
+    ],
+  );
 
   const undo = useCallback(() => {
     const newGame = new Chess();

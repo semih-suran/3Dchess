@@ -6,14 +6,14 @@ import { useMemo } from 'react';
 
 useGLTF.preload('/assets/models/king.glb');
 useGLTF.preload('/assets/models/queen.glb');
-useGLTF.preload('/assets/models/castle.glb');
+useGLTF.preload('/assets/models/rook.glb');
 useGLTF.preload('/assets/models/bishop.glb');
 useGLTF.preload('/assets/models/knight.glb');
 useGLTF.preload('/assets/models/pawn.glb');
 
 const pieceFileMap: Record<string, string> = {
   p: 'pawn.glb',
-  r: 'castle.glb',
+  r: 'rook.glb',
   n: 'knight.glb',
   b: 'bishop.glb',
   q: 'queen.glb',
@@ -28,7 +28,13 @@ interface Piece3DProps {
   isSelected?: boolean;
 }
 
-export const Piece3D = ({ piece, position, onClick, scale = 1.2, isSelected = false }: Piece3DProps) => {
+export const Piece3D = ({
+  piece,
+  position,
+  onClick,
+  scale = 1.2,
+  isSelected = false,
+}: Piece3DProps) => {
   const modelFile = pieceFileMap[piece.type];
   const { scene } = useGLTF(`/assets/models/${modelFile}`);
 
@@ -37,6 +43,10 @@ export const Piece3D = ({ piece, position, onClick, scale = 1.2, isSelected = fa
       color: piece.color === 'w' ? '#ffffff' : '#505050',
       metalness: 0.3,
       roughness: 0.6,
+      transparent: false,
+      opacity: 1,
+      // This is the fix: render both sides of the material
+      side: THREE.DoubleSide,
     });
   }, [piece.color]);
 
