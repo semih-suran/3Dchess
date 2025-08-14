@@ -1,14 +1,15 @@
 import { useChessGame } from '@/hooks/useChessGame';
 import { Timer } from './Timer';
-import { RotateCcw, Download, Flag, Users, Image as ImageIcon } from 'lucide-react';
+import { RotateCcw, Download, Flag, Users, Image as ImageIcon, X } from 'lucide-react';
 
 interface ScoreboardProps {
   game: ReturnType<typeof useChessGame>;
   selectedEnv: string;
   onEnvChange: (env: string) => void;
+  onClose: () => void; // New prop for closing on mobile
 }
 
-export const Scoreboard = ({ game, selectedEnv, onEnvChange }: ScoreboardProps) => {
+export const Scoreboard = ({ game, selectedEnv, onEnvChange, onClose }: ScoreboardProps) => {
   const { history, players, turn, status, pgn, undo, reset, makeMove, isGameOver } = game;
   const environmentOptions = ['cosy', 'grass', 'interior', 'park', 'snow'];
 
@@ -31,7 +32,14 @@ export const Scoreboard = ({ game, selectedEnv, onEnvChange }: ScoreboardProps) 
   };
 
   return (
-    <div className="w-full h-full bg-ui-panel text-ui-primary p-4 flex flex-col pointer-events-auto">
+    <div className="w-full h-full bg-ui-panel text-ui-primary p-4 flex flex-col pointer-events-auto relative overflow-y-auto">
+      {/* Mobile Close Button */}
+      <div className="absolute top-4 right-4 lg:hidden">
+        <button onClick={onClose} className="p-2 text-ui-secondary hover:text-ui-primary" aria-label="Close scoreboard">
+          <X size={24} />
+        </button>
+      </div>
+
       <h2 className="text-2xl font-bold mb-4 border-b border-ui-background pb-2">Chess</h2>
       
       <div className="flex justify-between items-center mb-4">
@@ -47,7 +55,7 @@ export const Scoreboard = ({ game, selectedEnv, onEnvChange }: ScoreboardProps) 
 
       <div className="text-center text-lg font-semibold text-yellow-400 h-8 mb-2">{status}</div>
 
-      <div className="flex-grow bg-ui-background rounded p-2 overflow-y-auto mb-4">
+      <div className="flex-grow bg-ui-background rounded p-2 overflow-y-auto mb-4 min-h-[100px]">
         <ol className="grid grid-cols-[auto_1fr_1fr] gap-x-4 gap-y-1 text-sm">
           {history.reduce((acc, move, i) => {
             if (i % 2 === 0) {
