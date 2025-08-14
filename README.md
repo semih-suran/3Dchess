@@ -1,16 +1,17 @@
 # Photorealistic 3D Chess - React & Three.js
 
-This is a production-ready, web-based chess game featuring photorealistic 3D visuals, a robust chess engine, and a polished user experience. It's built with Vite, React, TypeScript, `react-three-fiber`, and `chess.js`.
+A production-ready, web-based chess game featuring photorealistic 3D visuals, a robust chess engine, and a polished user experience. This project was built with Vite, React, TypeScript, `react-three-fiber`, and `chess.js`.
 
-![Chess Game Screenshot](https://placehold.co/800x450/262522/e8e6e3?text=Photorealistic+Chess+Game)
+![In-game screenshot of the 3D chess board](https://s3.ap-southeast-1.amazonaws.com/prod.pronto.ubersnap/event/689e1baeae58ae7865297433/media/dde42feb-71ac-4264-b2c9-45f24d4dd2ad/original.jpeg)
 
 ## Features
 
 - **Photorealistic 3D Board & Pieces**: Rendered with `react-three-fiber` using PBR materials and HDRI lighting.
+- **Customizable Environments**: Switch between multiple HDR backgrounds to change the game's lighting and mood.
 - **2D Fallback Mode**: Gracefully degrades to a 2D CSS-based board on devices without WebGL support.
 - **Complete Chess Logic**: Powered by `chess.js` for move validation, check/checkmate detection, and PGN handling.
-- **Interactive UI**: Click to select pieces, see legal moves highlighted with a soft glow, and animate piece movements.
-- **Game Controls**: Includes timers with increment, move history, undo, resign, and new game functionality.
+- **Polished UI**: Clear visual feedback for piece selection, legal moves, and game status.
+- **Game Controls**: Includes timers with increment, full move history, undo, resign, and new game functionality.
 - **Performant & Modern**: Built with Vite, TypeScript, and functional React components with hooks.
 
 ---
@@ -21,18 +22,20 @@ This is a production-ready, web-based chess game featuring photorealistic 3D vis
 
 - Node.js (v18 or higher)
 - npm or yarn
+- Git
 
 ### Installation & Running
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
-    cd your-project-folder
+    git clone [https://github.com/semih-suran/3Dchess.git](https://github.com/semih-suran/3Dchess.git)
+    cd 3Dchess
     ```
 
 2.  **Install dependencies:**
+    This project has some specific peer dependency requirements. The recommended way to install is with the `--legacy-peer-deps` flag.
     ```bash
-    npm install
+    npm install --legacy-peer-deps
     ```
 
 3.  **Run the development server:**
@@ -53,14 +56,13 @@ This is a production-ready, web-based chess game featuring photorealistic 3D vis
 
 ## Developer Checklist: Production Assets
 
-This project uses placeholder assets to run out of the box. To achieve photorealistic visuals, you must replace them with high-quality PBR assets.
+This project is set up to be easily customized with your own 3D assets.
 
-1.  **HDRI Environment Map**:
-    -   Replace `/public/assets/env/studio.hdr` with a high-resolution HDRI file (e.g., from [Poly Haven](https://polyhaven.com/hdris)). A studio lighting environment works best for clean reflections.
+1.  **HDRI Environment Maps**:
+    -   Place your `.hdr` files in the `/public/assets/env/` directory.
+    -   Update the `environmentOptions` array in `src/components/Scoreboard.tsx` to match your file names (without the `.hdr` extension).
 
 2.  **Chess Piece Models**:
-    -   Place your single-color `.glb` files for each piece type (e.g., `king.glb`, `pawn.glb`) in `/public/assets/models/`.
-    -   The code in `src/components/Piece3D.tsx` will programmatically color them white or dark grey.
-
-3.  **Board Textures (Optional)**:
-    -   For an even more realistic board, you can apply PBR textures. You would modify the `Chessboard` component in `src/components/Board3D.tsx` to use `useTexture` from `@react-three/drei` and apply albedo, normal, and roughness maps to the `meshStandardMaterial`.
+    -   The project uses a single set of textureless models and colors them programmatically.
+    -   Place your `.glb` files for each piece type (e.g., `king.glb`, `pawn.glb`) in `/public/assets/models/`.
+    -   Ensure the file names match the `pieceFileMap` in `src/components/Piece3D.tsx`.
