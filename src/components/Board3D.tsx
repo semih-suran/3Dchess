@@ -75,7 +75,8 @@ export const Board3D = ({ game, environmentFile }: Board3DProps) => {
   return (
     <Canvas>
       <PerspectiveCamera makeDefault position={[0, 15, 15]} fov={50} />
-      <OrbitControls enablePan={false} minDistance={10} maxDistance={30} maxPolarAngle={Math.PI / 2.2} />
+      {/* Increased maxDistance to allow zooming out further */}
+      <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 2.2} />
 
       <Environment files={`/assets/env/${environmentFile}.hdr`} background={true} />
       

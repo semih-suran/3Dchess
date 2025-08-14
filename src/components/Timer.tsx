@@ -7,9 +7,5 @@ const formatTime = (seconds: number): string => {
 };
 
 export const Timer = ({ timeLeft }: { timeLeft: number }) => {
-  return (
-    <div className="text-xl font-mono">
-      {formatTime(timeLeft)}
-    </div>
-  );
+  return <div className="font-mono text-xl">{formatTime(timeLeft)}</div>;
 };
